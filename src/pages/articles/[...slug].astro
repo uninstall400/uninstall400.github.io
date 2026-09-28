@@ -1,0 +1,78 @@
+---
+import { getCollection, render } from "astro:content";
+import { ArrowLeft, Tag } from "@lucide/astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { sortPosts, tagToSlug } from "../../lib/posts";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("posts", ({ data }) =>
+    import.meta.env.PROD ? !data.draft : true,
+  );
+
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post }
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const date = post.data.publishedAt.toISOString();
+const allPosts = sortPosts(
+  await getCollection("posts", ({ data }) =>
+    import.meta.env.PROD ? !data.draft : true,
+  ),
+);
+const currentIndex = allPosts.findIndex((entry) => entry.id === post.id);
+const previousPost = currentIndex >= 0 ? allPosts[currentIndex + 1] : undefined;
+---
+
+<BaseLayout
+  title={`${post.data.title} — fateStray`}
+  description={post.data.description}
+>
+  <main id="main" class="article-page">
+    <header class="article-hero shell">
+      <a class="back-link" href="/articles/">
+        <ArrowLeft size={15} stroke-width={1.8} aria-hidden="true" />
+        <span data-i18n="article.back">Back to writing</span>
+      </a>
+
+      <p class="article-hero__eyebrow">fateStray / writing</p>
+      <h1>{post.data.title}</h1>
+      {post.data.description && <p class="article-hero__summary">{post.data.description}</p>}
+
+      <div class="article-hero__meta">
+        <span>
+          <span data-i18n="article.published">Published</span>
+          <time datetime={date} data-local-date={date}>{date.slice(0, 10)}</time>
+        </span>
+        {
+          post.data.tags.length > 0 && (
+            <span class="article-hero__tags">
+              <Tag size={14} stroke-width={1.8} aria-hidden="true" />
+              {post.data.tags.map((tag) => (
+                <a href={`/tags/${tagToSlug(tag)}/`}>#{tag}</a>
+              ))}
+            </span>
+          )
+        }
+      </div>
+    </header>
+
+    <article class="article-shell prose" lang={post.data.lang}>
+      <Content />
+    </article>
+
+    {
+      previousPost && (
+        <nav class="article-next shell" aria-label="Next article">
+          <a href={`/articles/${previousPost.id}/`}>
+            <span class="mini-label">Next</span>
+            <strong>{previousPost.data.title}</strong>
+          </a>
+        </nav>
+      )
+    }
+  </main>
+</BaseLayout>

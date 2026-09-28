@@ -1,0 +1,172 @@
+---
+import { getCollection } from "astro:content";
+import { ChevronDown, Search, X } from "@lucide/astro";
+import ArticleCard from "../../components/ArticleCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { collectTags, sortPosts } from "../../lib/posts";
+
+const posts = sortPosts(
+  await getCollection("posts", ({ data }) =>
+    import.meta.env.PROD ? !data.draft : true,
+  ),
+);
+const tags = collectTags(posts);
+---
+
+<BaseLayout>
+  <main id="main" class="listing-page">
+    <header class="listing-hero shell">
+      <p class="section-label" data-i18n="writing.label">Writing</p>
+      <h1 data-i18n="writing.allTitle">All writing.</h1>
+      <p data-i18n="writing.allIntro">
+        Everything published so far, ordered from newest to oldest.
+      </p>
+    </header>
+
+    <section class="shell listing-content" aria-label="Articles">
+      {
+        posts.length > 0 ? (
+          <>
+            <div class="filter-bar">
+              <label class="search-field">
+                <Search size={16} stroke-width={1.7} aria-hidden="true" />
+                <span class="sr-only" data-i18n="writing.searchPlaceholder">
+                  Search titles, summaries and tags
+                </span>
+                <input
+                  type="search"
+                  data-article-search
+                  placeholder="Search titles, summaries and tags"
+                  data-i18n-placeholder="writing.searchPlaceholder"
+                  autocomplete="off"
+                />
+              </label>
+
+              <label class="select-field">
+                <span class="sr-only" data-i18n="writing.tagFilter">Tag</span>
+                <select
+                  data-tag-filter
+                  aria-label="Tag"
+                  data-i18n-aria-label="writing.tagFilter"
+                >
+                  <option value="" data-i18n="writing.allTags">
+                    All tags
+                  </option>
+                  {tags.map((tag) => (
+                    <option value={tag.slug}>{tag.label}</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} stroke-width={1.8} aria-hidden="true" />
+              </label>
+
+              <label class="select-field">
+                <span class="sr-only" data-i18n="writing.sort">Sort</span>
+                <select
+                  data-sort-order
+                  aria-label="Sort"
+                  data-i18n-aria-label="writing.sort"
+                >
+                  <option value="newest" data-i18n="writing.sortNewest">
+                    Newest first
+                  </option>
+                  <option value="oldest" data-i18n="writing.sortOldest">
+                    Oldest first
+                  </option>
+                </select>
+                <ChevronDown size={14} stroke-width={1.8} aria-hidden="true" />
+              </label>
+
+              <button
+                class="filter-clear"
+                type="button"
+                data-clear-filters
+                data-i18n-aria-label="writing.clearFilters"
+                aria-label="Clear filters"
+              >
+                <X size={16} stroke-width={1.8} aria-hidden="true" />
+              </button>
+            </div>
+
+            <div class="thread-list" data-article-list>
+              {posts.map((post) => <ArticleCard post={post} featured />)}
+            </div>
+
+            <div class="empty-state empty-state--filter" data-no-results hidden>
+              <p class="empty-state__title" data-i18n="writing.noResultsTitle">
+                No matching articles.
+              </p>
+              <p data-i18n="writing.noResultsBody">
+                Try a different keyword or tag.
+              </p>
+            </div>
+          </>
+        ) : (
+          <div class="empty-state">
+            <p class="empty-state__title" data-i18n="writing.emptyTitle">
+              No articles yet.
+            </p>
+            <p data-i18n="writing.emptyBody">
+              The first note is on its way.
+            </p>
+          </div>
+        )
+      }
+    </section>
+  </main>
+</BaseLayout>
+
+<script is:inline>
+  (() => {
+    const searchInput = document.querySelector("[data-article-search]");
+    const tagFilter = document.querySelector("[data-tag-filter]");
+    const sortOrder = document.querySelector("[data-sort-order]");
+    const clearButton = document.querySelector("[data-clear-filters]");
+    const list = document.querySelector("[data-article-list]");
+    const noResults = document.querySelector("[data-no-results]");
+
+    if (!searchInput || !tagFilter || !sortOrder || !list) return;
+
+    const cards = [...list.querySelectorAll("[data-article-card]")];
+
+    const applyFilters = () => {
+      const query = searchInput.value.trim().toLocaleLowerCase();
+      const selectedTag = tagFilter.value;
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const searchText = card.dataset.search || "";
+        const cardTags = (card.dataset.tags || "").split(/\s+/);
+        const matchesQuery = !query || searchText.includes(query);
+        const matchesTag = !selectedTag || cardTags.includes(selectedTag);
+        const isVisible = matchesQuery && matchesTag;
+
+        card.hidden = !isVisible;
+        if (isVisible) visibleCount += 1;
+      });
+
+      const direction = sortOrder.value === "oldest" ? 1 : -1;
+      [...cards]
+        .sort(
+          (a, b) =>
+            direction *
+            (Number(a.dataset.published) - Number(b.dataset.published)),
+        )
+        .forEach((card) => list.appendChild(card));
+
+      if (noResults) noResults.hidden = visibleCount !== 0;
+    };
+
+    searchInput.addEventListener("input", applyFilters);
+    tagFilter.addEventListener("change", applyFilters);
+    sortOrder.addEventListener("change", applyFilters);
+    clearButton?.addEventListener("click", () => {
+      searchInput.value = "";
+      tagFilter.value = "";
+      sortOrder.value = "newest";
+      applyFilters();
+      searchInput.focus();
+    });
+
+    applyFilters();
+  })();
+</script>

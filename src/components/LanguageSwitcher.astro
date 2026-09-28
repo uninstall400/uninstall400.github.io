@@ -1,0 +1,30 @@
+---
+const options = [
+  { code: "zh", label: "中" },
+  { code: "en", label: "EN" },
+  { code: "ja", label: "日" }
+] as const;
+---
+
+<div
+  class="language-switch"
+  role="group"
+  aria-label="Language"
+  data-i18n-aria-label="common.language"
+>
+  {
+    options.map((option) => (
+      <button
+        class="language-switch__button"
+        type="button"
+        data-language={option.code}
+        aria-label={`Switch to ${option.code}`}
+        data-i18n-aria-label={`language.${option.code}`}
+        aria-pressed="false"
+      >
+        {option.label}
+      </button>
+    ))
+  }
+</div>
+

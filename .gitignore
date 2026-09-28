@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+.playwright-cli/
+src/fonts/
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db

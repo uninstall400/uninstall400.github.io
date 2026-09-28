@@ -1,0 +1,209 @@
+---
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import { defaultLanguage, translate, ui } from "../i18n/ui";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  bodyClass?: string;
+}
+
+const { title: explicitTitle, description, bodyClass = "" } = Astro.props;
+const title = explicitTitle ?? translate(defaultLanguage, "meta.title");
+const t = (key: Parameters<typeof translate>[1]) =>
+  translate(defaultLanguage, key);
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const i18nJson = JSON.stringify(ui).replace(/</g, "\\u003c");
+---
+
+<!doctype html>
+<html lang={defaultLanguage} data-site-language={defaultLanguage}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <meta
+      name="description"
+      content={description ?? t("meta.description")}
+      data-i18n-content="meta.description"
+    />
+    <meta name="theme-color" content="#0f0d0f" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta
+      property="og:description"
+      content={description ?? t("meta.description")}
+    />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content="fateStray" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title data-i18n={explicitTitle ? undefined : "meta.title"}>{title}</title>
+
+    <script is:inline>
+      (() => {
+        const supported = ["en", "zh", "ja"];
+        let saved = null;
+
+        try {
+          saved = window.localStorage.getItem("fatestray:language");
+        } catch {}
+
+        if (supported.includes(saved)) {
+          document.documentElement.lang = saved;
+          document.documentElement.dataset.siteLanguage = saved;
+          return;
+        }
+
+        const browserLanguages =
+          navigator.languages && navigator.languages.length
+            ? navigator.languages
+            : [navigator.language || ""];
+
+        for (const candidate of browserLanguages) {
+          const language = candidate.toLowerCase();
+          if (language.startsWith("zh")) {
+            document.documentElement.lang = "zh";
+            document.documentElement.dataset.siteLanguage = "zh";
+            return;
+          }
+          if (language.startsWith("ja")) {
+            document.documentElement.lang = "ja";
+            document.documentElement.dataset.siteLanguage = "ja";
+            return;
+          }
+          if (language.startsWith("en")) {
+            document.documentElement.lang = "en";
+            document.documentElement.dataset.siteLanguage = "en";
+            return;
+          }
+        }
+
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+        const language = timezone === "Asia/Tokyo"
+          ? "ja"
+          : /^Asia\/(Shanghai|Chongqing|Harbin|Urumqi|Macau|Hong_Kong)$/.test(
+                timezone,
+              )
+            ? "zh"
+            : "en";
+
+        document.documentElement.lang = language;
+        document.documentElement.dataset.siteLanguage = language;
+      })();
+    </script>
+  </head>
+
+  <body class={bodyClass}>
+    <a class="skip-link" href="#main" data-i18n="common.skip">
+      Skip to content
+    </a>
+    <Header />
+    <slot />
+    <Footer />
+
+    <script
+      id="i18n-data"
+      type="application/json"
+      set:html={i18nJson}
+    ></script>
+    <script is:inline>
+      (() => {
+        const dictionary = JSON.parse(
+          document.getElementById("i18n-data")?.textContent || "{}",
+        );
+        const buttons = [...document.querySelectorAll("[data-language]")];
+        const supported = ["en", "zh", "ja"];
+
+        const formatDates = (language) => {
+          const locale = language === "zh"
+            ? "zh-CN"
+            : language === "ja"
+              ? "ja-JP"
+              : "en-US";
+          const formatter = new Intl.DateTimeFormat(locale, {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
+
+          document.querySelectorAll("[data-local-date]").forEach((element) => {
+            const value = element.getAttribute("datetime") ||
+              element.dataset.localDate;
+            if (!value) return;
+            const date = new Date(value);
+            if (!Number.isNaN(date.valueOf())) {
+              element.textContent = formatter.format(date);
+            }
+          });
+        };
+
+        const applyLanguage = (language) => {
+          const strings = dictionary[language] || dictionary.en;
+
+          document.documentElement.lang = language;
+          document.documentElement.dataset.siteLanguage = language;
+
+          document.querySelectorAll("[data-i18n]").forEach((element) => {
+            const key = element.dataset.i18n;
+            const value = strings[key] || dictionary.en[key];
+            if (value) element.textContent = value;
+          });
+
+          document
+            .querySelectorAll("[data-i18n-aria-label]")
+            .forEach((element) => {
+              const key = element.dataset.i18nAriaLabel;
+              const value = strings[key] || dictionary.en[key];
+              if (value) element.setAttribute("aria-label", value);
+            });
+
+          document
+            .querySelectorAll("[data-i18n-content]")
+            .forEach((element) => {
+              const key = element.dataset.i18nContent;
+              const value = strings[key] || dictionary.en[key];
+              if (value) element.setAttribute("content", value);
+            });
+
+          document
+            .querySelectorAll("[data-i18n-placeholder]")
+            .forEach((element) => {
+              const key = element.dataset.i18nPlaceholder;
+              const value = strings[key] || dictionary.en[key];
+              if (value) element.setAttribute("placeholder", value);
+            });
+
+          buttons.forEach((button) => {
+            button.setAttribute(
+              "aria-pressed",
+              String(button.dataset.language === language),
+            );
+          });
+
+          formatDates(language);
+        };
+
+        let language = document.documentElement.dataset.siteLanguage || "en";
+        if (!supported.includes(language)) language = "en";
+        applyLanguage(language);
+
+        buttons.forEach((button) => {
+          button.addEventListener("click", () => {
+            language = button.dataset.language;
+            if (!supported.includes(language)) return;
+
+            try {
+              window.localStorage.setItem("fatestray:language", language);
+            } catch {}
+
+            applyLanguage(language);
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

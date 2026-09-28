@@ -1,0 +1,43 @@
+---
+import { getCollection } from "astro:content";
+import ArticleCard from "../../components/ArticleCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { collectTags, sortPosts, tagToSlug } from "../../lib/posts";
+
+export async function getStaticPaths() {
+  const posts = sortPosts(
+    await getCollection("posts", ({ data }) =>
+      import.meta.env.PROD ? !data.draft : true,
+    ),
+  );
+
+  return collectTags(posts).map((tag) => ({
+    params: { tag: tag.slug },
+    props: { tag: tag.label }
+  }));
+}
+
+const { tag } = Astro.props;
+const posts = sortPosts(
+  await getCollection("posts", ({ data }) =>
+    import.meta.env.PROD ? !data.draft : true,
+  ),
+).filter((post) => post.data.tags.some((item) => tagToSlug(item) === tagToSlug(tag)));
+---
+
+<BaseLayout title={`#${tag} — fateStray`}>
+  <main id="main" class="listing-page">
+    <header class="listing-hero shell">
+      <p class="section-label" data-i18n="tag.title">Tag</p>
+      <h1>#{tag}</h1>
+      <p data-i18n="tag.description">Articles filed under this tag.</p>
+    </header>
+
+    <section class="shell listing-content" aria-label={`Articles tagged ${tag}`}>
+      <div class="post-list">
+        {posts.map((post) => <ArticleCard post={post} featured />)}
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+

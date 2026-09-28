@@ -1,0 +1,137 @@
+---
+import { getCollection } from "astro:content";
+import { ArrowRight, ArrowUpRight, Mail } from "@lucide/astro";
+import ArticleCard from "../components/ArticleCard.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import paPreview from "../images/pak.png";
+import { sortPosts } from "../lib/posts";
+
+const posts = sortPosts(
+  await getCollection("posts", ({ data }) =>
+    import.meta.env.PROD ? !data.draft : true,
+  ),
+);
+const latestPosts = posts.slice(0, 3);
+---
+
+<BaseLayout>
+  <main id="main">
+    <section
+      class="content-section content-section--first shell"
+      id="writing"
+      aria-label="Writing"
+    >
+      {
+        latestPosts.length > 0 ? (
+          <div class="thread-list">
+            {latestPosts.map((post) => <ArticleCard post={post} />)}
+          </div>
+        ) : (
+          <div class="empty-state">
+            <p class="empty-state__title" data-i18n="writing.emptyTitle">
+              No articles yet.
+            </p>
+            <p data-i18n="writing.emptyBody">
+              The first note is on its way.
+            </p>
+          </div>
+        )
+      }
+
+      <div class="section-action">
+        <a class="button" href="/articles/">
+          <span data-i18n="writing.viewAll">View all writing</span>
+          <ArrowRight size={16} stroke-width={1.8} aria-hidden="true" />
+        </a>
+      </div>
+    </section>
+
+    <section class="content-section shell" id="work" aria-label="Projects">
+      <div class="project-card-list">
+        <article class="project-card">
+          <div class="project-card__visual project-card__visual--image">
+            <img src={paPreview.src} alt="" loading="lazy" />
+          </div>
+
+          <div class="project-card__body">
+            <div class="card-meta">
+              <span class="tag-pill tag-pill--accent">Windows</span>
+              <span class="tag-pill">Desktop</span>
+            </div>
+            <h3>PA Keystroke</h3>
+            <p data-i18n="work.pa.description">
+              A clean, customizable keystroke visualizer for gameplay
+              recordings, livestreams and tutorials.
+            </p>
+          </div>
+
+          <a
+            class="card-action"
+            href="https://github.com/uninstall400/PA-Keystroke-Releases"
+            target="_blank"
+            rel="noreferrer"
+            data-i18n-aria-label="work.view"
+            aria-label="View project"
+          >
+            <ArrowUpRight size={19} stroke-width={1.6} aria-hidden="true" />
+          </a>
+        </article>
+
+        <article class="project-card project-card--private">
+          <div class="project-card__visual" aria-hidden="true">
+            <div class="keyboard-strip keyboard-strip--muted">
+              <span>P</span>
+              <span>A</span>
+              <span>M</span>
+              <span>C</span>
+              <i></i>
+            </div>
+          </div>
+
+          <div class="project-card__body">
+            <div class="card-meta">
+              <span class="tag-pill tag-pill--green" data-i18n="work.private">
+                Private
+              </span>
+              <span class="tag-pill">Windows</span>
+            </div>
+            <h3>PAMC</h3>
+            <p data-i18n="work.pamc.description">
+              An automation tool for Party Animals, built for the parts that
+              are worth doing and the parts that are not.
+            </p>
+          </div>
+
+          <span class="card-action card-action--disabled" aria-hidden="true">
+            <ArrowUpRight size={19} stroke-width={1.6} />
+          </span>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-section shell" id="about" aria-label="About">
+      <div class="about-panel">
+        <div class="about-panel__copy">
+          <div class="interest-block">
+            <p class="mini-label" data-i18n="about.interests">Interests</p>
+            <p>Software · UI · Game Tools · Party Animals</p>
+          </div>
+        </div>
+
+        <div class="contact-panel">
+          <p class="contact-panel__title" data-i18n="about.contactTitle">
+            Have something worth making?
+          </p>
+          <p class="contact-panel__body" data-i18n="about.contactBody">
+            For project notes, questions or a simple hello, email is the best
+            place to reach me.
+          </p>
+          <a class="button button--primary" href="mailto:syuinak@hotmail.com">
+            <Mail size={16} stroke-width={1.8} aria-hidden="true" />
+            <span>syuinak@hotmail.com</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

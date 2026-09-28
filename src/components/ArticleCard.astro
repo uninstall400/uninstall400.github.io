@@ -1,0 +1,52 @@
+---
+import { ArrowUpRight } from "@lucide/astro";
+import type { Post } from "../lib/posts";
+import { getPostPath, tagToSlug } from "../lib/posts";
+
+interface Props {
+  post: Post;
+  featured?: boolean;
+}
+
+const { post, featured = false } = Astro.props;
+const date = post.data.publishedAt.toISOString();
+const tagSlugs = post.data.tags.map(tagToSlug);
+const searchText = [
+  post.data.title,
+  post.data.description ?? "",
+  ...post.data.tags
+]
+  .join(" ")
+  .toLocaleLowerCase();
+---
+
+<a
+  class:list={["thread-card", { "thread-card--featured": featured }]}
+  href={getPostPath(post)}
+  data-article-card
+  data-search={searchText}
+  data-tags={tagSlugs.join(" ")}
+  data-published={post.data.publishedAt.valueOf()}
+>
+  <span class="thread-card__avatar" aria-hidden="true">F</span>
+
+  <div class="thread-card__body">
+    <div class="thread-card__meta">
+      {
+        post.data.tags.slice(0, 3).map((tag) => (
+          <span class="tag-pill">#{tag}</span>
+        ))
+      }
+      <time datetime={date} data-local-date={date}>
+        {date.slice(0, 10)}
+      </time>
+    </div>
+
+    <h3>{post.data.title}</h3>
+    {post.data.description && <p>{post.data.description}</p>}
+  </div>
+
+  <span class="thread-card__arrow" aria-hidden="true">
+    <ArrowUpRight size={20} stroke-width={1.6} />
+  </span>
+</a>
