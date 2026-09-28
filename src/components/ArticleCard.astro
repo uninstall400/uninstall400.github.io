@@ -1,5 +1,5 @@
 ---
-import { ArrowUpRight } from "@lucide/astro";
+import { ArrowUpRight, FileText } from "@lucide/astro";
 import type { Post } from "../lib/posts";
 import { getPostPath, tagToSlug } from "../lib/posts";
 
@@ -28,7 +28,9 @@ const searchText = [
   data-tags={tagSlugs.join(" ")}
   data-published={post.data.publishedAt.valueOf()}
 >
-  <span class="thread-card__avatar" aria-hidden="true">F</span>
+  <span class="thread-card__avatar" aria-hidden="true">
+    <FileText size={17} stroke-width={1.7} />
+  </span>
 
   <div class="thread-card__body">
     <div class="thread-card__meta">

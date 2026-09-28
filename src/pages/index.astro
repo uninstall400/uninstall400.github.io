@@ -1,17 +1,18 @@
 ---
-import { getCollection } from "astro:content";
-import { ArrowRight, ArrowUpRight, Mail } from "@lucide/astro";
-import ArticleCard from "../components/ArticleCard.astro";
+import { getCollection, render } from "astro:content";
+import { ArrowRight, ArrowUpRight, FileText, Mail, Tag } from "@lucide/astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import paPreview from "../images/pak.png";
-import { sortPosts } from "../lib/posts";
+import { sortPosts, tagToSlug } from "../lib/posts";
 
 const posts = sortPosts(
   await getCollection("posts", ({ data }) =>
     import.meta.env.PROD ? !data.draft : true,
   ),
 );
-const latestPosts = posts.slice(0, 3);
+const latestPost = posts[0];
+const Content = latestPost ? (await render(latestPost)).Content : null;
+const latestDate = latestPost?.data.publishedAt.toISOString();
 ---
 
 <BaseLayout>
@@ -22,10 +23,57 @@ const latestPosts = posts.slice(0, 3);
       aria-label="Writing"
     >
       {
-        latestPosts.length > 0 ? (
-          <div class="thread-list">
-            {latestPosts.map((post) => <ArticleCard post={post} />)}
-          </div>
+        latestPost && Content ? (
+          <article class="home-article">
+            <header class="home-article__header">
+              <div class="thread-card__meta">
+                <FileText size={14} stroke-width={1.7} aria-hidden="true" />
+                {
+                  latestPost.data.tags.slice(0, 3).map((tag) => (
+                    <a
+                      class="tag-pill"
+                      href={`/tags/${tagToSlug(tag)}/`}
+                    >
+                      #{tag}
+                    </a>
+                  ))
+                }
+                {latestDate && (
+                  <time datetime={latestDate} data-local-date={latestDate}>
+                    {latestDate.slice(0, 10)}
+                  </time>
+                )}
+              </div>
+
+              <h1>
+                <a href={`/articles/${latestPost.id}/`}>
+                  {latestPost.data.title}
+                </a>
+              </h1>
+
+              {latestPost.data.description && (
+                <p class="home-article__description">
+                  {latestPost.data.description}
+                </p>
+              )}
+            </header>
+
+            <div class="prose home-article__body" lang={latestPost.data.lang}>
+              <Content />
+            </div>
+
+            <footer class="home-article__footer">
+              <span>
+                <Tag size={14} stroke-width={1.7} aria-hidden="true" />
+                <span data-i18n="article.tags">Tags</span>
+              </span>
+              <div class="home-article__tags">
+                {latestPost.data.tags.map((tag) => (
+                  <a href={`/tags/${tagToSlug(tag)}/`}>#{tag}</a>
+                ))}
+              </div>
+            </footer>
+          </article>
         ) : (
           <div class="empty-state">
             <p class="empty-state__title" data-i18n="writing.emptyTitle">

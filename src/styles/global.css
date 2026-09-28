@@ -637,6 +637,111 @@ svg {
   color: rgba(122, 188, 255, 0.95);
 }
 
+.thread-card__avatar svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.home-article {
+  max-width: 900px;
+  margin-inline: auto;
+  padding: 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.home-article__header {
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.home-article__header .thread-card__meta {
+  align-items: center;
+}
+
+.home-article__header .thread-card__meta > svg {
+  color: var(--blue);
+}
+
+.home-article .tag-pill {
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.home-article .tag-pill:hover {
+  background: var(--blue-soft);
+  color: rgba(122, 188, 255, 0.95);
+}
+
+.home-article h1 {
+  margin: 0.75rem 0 0;
+  color: var(--text);
+  font-size: 2.15rem;
+  font-weight: 750;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.home-article h1 a {
+  transition: color 160ms ease;
+}
+
+.home-article h1 a:hover {
+  color: rgba(122, 188, 255, 0.95);
+}
+
+.home-article__description {
+  max-width: 46rem;
+  margin: 0.8rem 0 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+
+.home-article__body {
+  max-width: 760px;
+  margin-inline: auto;
+  padding-top: 2.5rem;
+}
+
+.home-article__body > :first-child {
+  margin-top: 0;
+}
+
+.home-article__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+  margin-top: 2.75rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--line);
+  color: var(--faint);
+  font-size: 0.72rem;
+}
+
+.home-article__footer > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.home-article__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.home-article__tags a {
+  color: rgba(122, 188, 255, 0.82);
+  transition: color 160ms ease;
+}
+
+.home-article__tags a:hover {
+  color: var(--text);
+}
+
 .empty-state {
   display: grid;
   min-height: 13rem;
@@ -1350,6 +1455,18 @@ svg {
   .thread-card__avatar {
     width: 2.3rem;
     border-radius: 8px;
+  }
+
+  .home-article {
+    padding: 0.9rem;
+  }
+
+  .home-article h1 {
+    font-size: 1.6rem;
+  }
+
+  .home-article__body {
+    padding-top: 1.75rem;
   }
 
   .thread-card h3 {
