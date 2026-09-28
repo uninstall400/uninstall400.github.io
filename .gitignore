@@ -2,6 +2,7 @@ node_modules/
 dist/
 .astro/
 .playwright-cli/
+ARTICLE_GUIDE.md
 src/fonts/
 .env
 .env.*
