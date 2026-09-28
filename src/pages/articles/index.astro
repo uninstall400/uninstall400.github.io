@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import { ChevronDown, Search, X } from "@lucide/astro";
+import { ChevronDown, Search } from "@lucide/astro";
 import ArticleCard from "../../components/ArticleCard.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { collectTags, sortPosts } from "../../lib/posts";
@@ -76,15 +76,6 @@ const tags = collectTags(posts);
                 <ChevronDown size={14} stroke-width={1.8} aria-hidden="true" />
               </label>
 
-              <button
-                class="filter-clear"
-                type="button"
-                data-clear-filters
-                data-i18n-aria-label="writing.clearFilters"
-                aria-label="Clear filters"
-              >
-                <X size={16} stroke-width={1.8} aria-hidden="true" />
-              </button>
             </div>
 
             <div class="thread-list" data-article-list>
@@ -120,7 +111,6 @@ const tags = collectTags(posts);
     const searchInput = document.querySelector("[data-article-search]");
     const tagFilter = document.querySelector("[data-tag-filter]");
     const sortOrder = document.querySelector("[data-sort-order]");
-    const clearButton = document.querySelector("[data-clear-filters]");
     const list = document.querySelector("[data-article-list]");
     const noResults = document.querySelector("[data-no-results]");
 
@@ -159,14 +149,6 @@ const tags = collectTags(posts);
     searchInput.addEventListener("input", applyFilters);
     tagFilter.addEventListener("change", applyFilters);
     sortOrder.addEventListener("change", applyFilters);
-    clearButton?.addEventListener("click", () => {
-      searchInput.value = "";
-      tagFilter.value = "";
-      sortOrder.value = "newest";
-      applyFilters();
-      searchInput.focus();
-    });
-
     applyFilters();
   })();
 </script>

@@ -942,29 +942,6 @@ svg {
   pointer-events: none;
 }
 
-.filter-clear {
-  display: grid;
-  width: 2.65rem;
-  min-width: 2.65rem;
-  aspect-ratio: 1;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.035);
-  color: var(--faint);
-  cursor: pointer;
-  transition:
-    border-color 160ms ease,
-    background 160ms ease,
-    color 160ms ease;
-}
-
-.filter-clear:hover {
-  border-color: var(--line-strong);
-  background: rgba(255, 255, 255, 0.055);
-  color: var(--text-soft);
-}
-
 .empty-state--filter {
   margin-top: 0.55rem;
 }
@@ -1488,10 +1465,6 @@ svg {
 
   .select-field {
     flex: 1 1 calc(50% - 1.1rem);
-  }
-
-  .filter-clear {
-    flex: 0 0 2.65rem;
   }
 
   .article-hero {
